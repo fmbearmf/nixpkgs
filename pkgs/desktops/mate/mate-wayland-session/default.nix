@@ -40,7 +40,6 @@ stdenvNoCC.mkDerivation rec {
     substituteInPlace session/mate-wayland.sh \
       --replace-fail "cp /usr/share/doc/wayfire/examples/wayfire.ini" "cp --no-preserve=mode,ownership ${wayfire.src}/wayfire.ini" \
       --replace-fail "/usr/share/doc/wayfire/examples/wayfire.ini" "${wayfire.src}/wayfire.ini" \
-      --replace-fail "/usr/lib/x86_64-linux-gnu/wayfire/libfiredecor.so" "${wayfirePlugins.firedecor}/lib/wayfire/libfiredecor.so" \
       --replace-fail "/usr/share/doc/firedecor/firedecor.config" "$out/share/doc/firedecor/firedecor.config"
   '';
 
