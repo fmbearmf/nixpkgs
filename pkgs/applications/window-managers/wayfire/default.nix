@@ -3,6 +3,7 @@
   stdenv,
   fetchFromGitHub,
   nixosTests,
+  vulkanSupport ? true,
   cmake,
   meson,
   ninja,
@@ -22,20 +23,22 @@
   wayland-scanner,
   wlroots,
   pango,
-  nlohmann_json,
   xorg,
+  yyjson,
+  vulkan-headers,
+  vulkan-loader,
 }:
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "wayfire";
-  version = "0.9.0";
+  version = "0.10.0";
 
   src = fetchFromGitHub {
     owner = "WayfireWM";
     repo = "wayfire";
     rev = "v${finalAttrs.version}";
     fetchSubmodules = true;
-    hash = "sha256-xQZ4/UE66IISZQLl702OQXAAr8XmEsA4hJwB7aXua+E=";
+    hash = "sha256-rnrcuikfRPnIfIkmKUIRh8Sm+POwFLzaZZMAlmeBdjY=";
   };
 
   nativeBuildInputs = [
@@ -54,8 +57,13 @@ stdenv.mkDerivation (finalAttrs: {
     libjpeg
     libxkbcommon
     wayland-protocols
+    wlroots
     xorg.xcbutilwm
-    nlohmann_json
+    yyjson
+  ]
+  ++ lib.optionals vulkanSupport [
+    vulkan-headers
+    vulkan-loader
   ];
 
   propagatedBuildInputs = [
@@ -64,12 +72,22 @@ stdenv.mkDerivation (finalAttrs: {
     wayland
     cairo
     pango
+    libdrm
+  ]
+  ++ lib.optionals vulkanSupport [
+    vulkan-headers
+    vulkan-loader
   ];
 
   nativeCheckInputs = [
     cmake
     doctest
   ];
+
+  postPatch = ''
+    substituteInPlace plugins/common/wayfire/plugins/common/cairo-util.hpp \
+      --replace "<drm_fourcc.h>" "<libdrm/drm_fourcc.h>"
+  '';
 
   # CMake is just used for finding doctest.
   dontUseCmakeConfigure = true;
